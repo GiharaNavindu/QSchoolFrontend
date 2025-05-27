@@ -30,6 +30,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role, userId }) => {
                   <Link to={`/student/${userId}/enrollments`}>My Enrollments</Link>
                 </Button>
               </li>
+               <li>
+                <Button asChild variant="ghost" className="w-full justify-start text-white hover:text-gray-300">
+                  <Link to={`/student/${userId}/modules`}>Modules</Link>
+                </Button>
+              </li>
             </>
           )}
           {role === 'Lecturer' && (

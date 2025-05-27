@@ -16,7 +16,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
   const [newEnrollment, setNewEnrollment] = useState<{ courseId: string }>({ courseId: '' });
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/enrolls/student/${userId}`)
+    axios.get(`http://localhost:8080/api/enroll/student/${userId}`)
       .then(res => setEnrollments(res.data))
       .catch(err => console.error(err));
     axios.get(`http://localhost:8080/api/course`)
@@ -25,7 +25,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
   }, [userId]);
 
   const handleCreate = () => {
-    axios.post(`http://localhost:8080/api/enrolls`, {
+    axios.post(`http://localhost:8080/api/enroll`, {
       course: { courseId: newEnrollment.courseId },
       student: { studentId: userId }
     })
@@ -37,7 +37,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
   };
 
   const handleDelete = (enrollmentId: number) => {
-    axios.delete(`http://localhost:8080/api/enrolls/${enrollmentId}`)
+    axios.delete(`http://localhost:8080/api/enroll/${enrollmentId}`)
       .then(() => setEnrollments(enrollments.filter(e => e.enrollmentId !== enrollmentId)))
       .catch(err => console.error(err));
   };

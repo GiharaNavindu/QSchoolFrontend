@@ -38,7 +38,9 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Manage Courses</h1>
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div className="text-2xl font-bold mb-4">
+      <p className="text-lg mb-2">Add New Course</p>
+        <div className="mb-4 grid grid-cols- md:grid-cols-3 gap-2">
         <Input
           placeholder="Course ID"
           value={newCourse.courseId}
@@ -58,6 +60,7 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
         <Button onClick={handleCreate} disabled={!newCourse.courseId || !newCourse.name}>
           Add Course
         </Button>
+      </div>
       </div>
       <Table>
         <TableHeader>

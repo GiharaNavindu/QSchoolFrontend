@@ -54,6 +54,7 @@ const LecturerStudents: React.FC<LecturerStudentsProps> = ({ userId }) => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Manage Students</h1>
+      <p className="text-lgfont-semi-bold mb-2">Add New Student</p>
       <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
         <Input
           placeholder="Student ID"
