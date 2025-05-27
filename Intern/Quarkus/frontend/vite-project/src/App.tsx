@@ -10,6 +10,8 @@ import LecturerDashboard from './pages/LecturerDasboard';
 import LecturerStudents from './pages/LecturerStudents';
 import LecturerCourses from './pages/LecturerCourses';
 
+
+//git check
 const App: React.FC = () => {
   const [role, setRole] = useState<string>('Student'); // Default role, replace with auth
   const [userId, setUserId] = useState<string>('S001'); // Default userId, replace with auth
