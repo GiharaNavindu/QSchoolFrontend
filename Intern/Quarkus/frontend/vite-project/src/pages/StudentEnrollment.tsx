@@ -82,7 +82,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
         enrollmentDate: data.enrollmentDate,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries(["enrollments", userId]);
+      queryClient.invalidateQueries({ queryKey: ["enrollments", userId] });
       reset();
       toast.success("Enrolled successfully");
     },
@@ -95,7 +95,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
     mutationFn: (enrollmentId: number) =>
       axios.delete(`${API_URL}/api/enroll/${enrollmentId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["enrollments", userId]);
+      queryClient.invalidateQueries({ queryKey: ["enrollments", userId] });
       toast.success("Enrollment removed successfully");
     },
     onError: (error: any) => {
@@ -154,7 +154,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
               </div>
             )}
           />
-          <Button type="submit" disabled={enrollMutation.isLoading}>
+          <Button type="submit" disabled={enrollMutation.isPending}>
             Enroll
           </Button>
         </form>
@@ -182,7 +182,7 @@ const StudentEnrollments: React.FC<StudentEnrollmentsProps> = ({ userId }) => {
                     <Button
                       variant="destructive"
                       onClick={() => deleteMutation.mutate(enroll.enrollmentId)}
-                      disabled={deleteMutation.isLoading}
+                      disabled={deleteMutation.isPending}
                     >
                       Remove
                     </Button>

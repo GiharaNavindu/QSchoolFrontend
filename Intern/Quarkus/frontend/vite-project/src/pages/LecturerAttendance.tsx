@@ -40,7 +40,7 @@ const LecturerAttendance: React.FC<LecturerAttendanceProps> = ({ userId }) => {
     mutationFn: (data: { student: Student; lecture: Lecture; attended: boolean }) =>
       axios.post(`${API_URL}/api/attendance/mark`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['attendance', lectureId]);
+      queryClient.invalidateQueries({ queryKey: ['attendance', lectureId] });
       toast.success('Attendance marked successfully');
     },
     onError: (error: any) => {
@@ -49,9 +49,14 @@ const LecturerAttendance: React.FC<LecturerAttendanceProps> = ({ userId }) => {
   });
 
   const handleMarkAttendance = (student: Student, attended: boolean) => {
+    const selectedLecture = lectures?.find((lecture: Lecture) => lecture.lectureId === parseInt(lectureId));
+    if (!selectedLecture) {
+      toast.error('Lecture not found');
+      return;
+    }
     markAttendanceMutation.mutate({
       student,
-      lecture: { lectureId: parseInt(lectureId) },
+      lecture: selectedLecture,
       attended,
     });
   };
@@ -92,7 +97,7 @@ const LecturerAttendance: React.FC<LecturerAttendanceProps> = ({ userId }) => {
                 <TableCell>
                   <Button
                     onClick={() => handleMarkAttendance(att.student, !att.attended)}
-                    disabled={markAttendanceMutation.isLoading}
+                    disabled={markAttendanceMutation.isPending}
                   >
                     Mark {att.attended ? 'Absent' : 'Present'}
                   </Button>
