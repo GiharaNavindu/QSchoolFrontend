@@ -74,3 +74,11 @@ export interface UpcomingLecture {
   venue: string;
   time: string;
 }
+
+export interface Attendance {
+  attendanceId: number;
+  student: Student;
+  lecture: Lecture;
+  attended: boolean;
+  markedAt?: string;
+}

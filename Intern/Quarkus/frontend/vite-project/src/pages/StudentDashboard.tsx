@@ -1,106 +1,132 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import {
+  ArcElement,
+  BarElement,
+  CategoryScale,
   Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import * as React from "react";
+import { Bar, Pie } from "react-chartjs-2";
+import { AttendanceData, Enrolls, UpcomingLecture } from "../types";
+
+ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   ArcElement,
   Title,
   Tooltip,
-  Legend,
-} from 'chart.js';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Student, Enrolls, AttendanceData, ProgressData, UpcomingLecture } from '../types';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+  Legend
+);
 
 interface StudentDashboardProps {
   userId: string;
 }
 
+const API_URL =  "http://localhost:8080";
+
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
-  const [student, setStudent] = useState<Student | null>(null);
-  const [enrollments, setEnrollments] = useState<Enrolls[]>([]);
-  const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([]);
-  const [progressData, setProgressData] = useState<ProgressData | null>(null);
-  const [upcomingLectures, setUpcomingLectures] = useState<UpcomingLecture[]>([]);
+  const { data: student, isLoading: studentLoading } = useQuery({
+    queryKey: ["student", userId],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL}/api/student/${userId}`);
+      return response.data;
+    },
+  });
 
-  useEffect(() => {
-    // Fetch student profile
-    axios.get(`http://localhost:8080/api/student/${userId}`)
-      .then(res => {
-        setStudent(res.data);
-        console.log('Student Profile:', res.data);
-        
-      })
-      .catch(err => console.error(err));
+  const { data: enrollments, isLoading: enrollmentsLoading } = useQuery({
+    queryKey: ["enrollments", userId],
+    queryFn: async () => {
+      const response = await axios.get(
+        `${API_URL}/api/enroll/student/${userId}`
+      );
+      return response.data;
+    },
+  });
 
-    // Fetch enrollments
-    axios.get(`http://localhost:8080/api/enroll/student/${userId}`)
-      .then(res =>{
-         setEnrollments(res.data);
-         console.log('Enrollments:', res.data);
-      })
-      .catch(err => console.error(err));
+  const { data: attendanceData, isLoading: attendanceLoading } = useQuery({
+    queryKey: ["attendance", userId],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL}/api/attendance/${userId}`);
+      return response.data;
+    },
+  });
 
-    // Fetch attendance data
-    axios.get(`http://localhost:8080/api/attendance/${userId}`)
-      .then(res => {
-        setAttendanceData(res.data);
-        console.log('Attendance Data:', res.data);
-      })
-      .catch(err => console.error(err));
+  const { data: progressData, isLoading: progressLoading } = useQuery({
+    queryKey: ["progress", userId],
+    queryFn: async () => {
+      const response = await axios.get(
+        `${API_URL}/api/student/${userId}/progress`
+      );
+      return response.data;
+    },
+  });
 
-    // Fetch progress data
-    axios.get(`http://localhost:8080/api/student/${userId}/progress`)
-      .then(res => {
-        setProgressData(res.data);
-        console.log('Progress Data:', res.data);
-      })
-      .catch(err => console.error(err));
+  const { data: upcomingLectures, isLoading: lecturesLoading } = useQuery({
+    queryKey: ["upcomingLectures", userId],
+    queryFn: async () => {
+      const response = await axios.get(
+        `${API_URL}/api/lecture/student/${userId}/upcoming`
+      );
+      return response.data;
+    },
+  });
 
-    // Fetch upcoming lectures
-    axios.get(`http://localhost:8080/api/lecture/student/${userId}/upcoming`)
-      .then(res => {
-        setUpcomingLectures(res.data);
-        console.log('Upcoming Lectures:', res.data);
-      })
-      .catch(err => console.error(err));
-  }, [userId]);
-
-  // Attendance Bar Chart Data
   const attendanceChartData = {
-    labels: attendanceData.map(data => data.moduleName),
+    labels:
+      attendanceData?.map((data: AttendanceData) => data.moduleName) || [],
     datasets: [
       {
-        label: 'Attended Lectures',
-        data: attendanceData.map(data => data.attendedLectures),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        label: "Attended Lectures",
+        data:
+          attendanceData?.map(
+            (data: AttendanceData) => data.attendedLectures
+          ) || [],
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
       },
       {
-        label: 'Total Lectures',
-        data: attendanceData.map(data => data.totalLectures),
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        label: "Total Lectures",
+        data:
+          attendanceData?.map((data: AttendanceData) => data.totalLectures) ||
+          [],
+        backgroundColor: "rgba(255, 99, 132, 0.6)",
       },
     ],
   };
 
-  // Enrollment Pie Chart Data
   const enrollmentChartData = {
-    labels: enrollments.map(enroll => enroll.course.name),
+    labels: enrollments?.map((enroll: Enrolls) => enroll.course.name) || [],
     datasets: [
       {
-        data: enrollments.map(enroll => enroll.course.modules?.reduce((sum, module) => sum + (module.numberOfCredits || 0), 0) || 0),
+        data:
+          enrollments?.map(
+            (enroll: Enrolls) =>
+              enroll.course.modules?.reduce(
+                (sum, module) => sum + (module.numberOfCredits || 0),
+                0
+              ) || 0
+          ) || [],
         backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(255, 206, 86, 0.6)",
+          "rgba(75, 192, 192, 0.6)",
+          "rgba(153, 102, 255, 0.6)",
         ],
       },
     ],
@@ -109,16 +135,28 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
-      {student && (
+      {studentLoading ||
+      enrollmentsLoading ||
+      attendanceLoading ||
+      progressLoading ||
+      lecturesLoading ? (
+        <p>Loading...</p>
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Profile</CardTitle>
             </CardHeader>
             <CardContent>
-              <p><strong>Name:</strong> {student.firstName} {student.lastName}</p>
-              <p><strong>Email:</strong> {student.email}</p>
-              <p><strong>Batch:</strong> {student.batch || 'N/A'}</p>
+              <p>
+                <strong>Name:</strong> {student?.firstName} {student?.lastName}
+              </p>
+              <p>
+                <strong>Email:</strong> {student?.email}
+              </p>
+              <p>
+                <strong>Batch:</strong> {student?.batch || "N/A"}
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -126,9 +164,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
               <CardTitle>Enrolled Courses</CardTitle>
             </CardHeader>
             <CardContent>
-              {enrollments.length > 0 ? (
+              {enrollments?.length > 0 ? (
                 <ul className="list-disc pl-5">
-                  {enrollments.map(enroll => (
+                  {enrollments.map((enroll: Enrolls) => (
                     <li key={enroll.enrollmentId}>
                       {enroll.course.name} (Enrolled: {enroll.enrollmentDate})
                     </li>
@@ -147,8 +185,18 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
               <Bar
                 data={attendanceChartData}
                 options={{
-                  plugins: { title: { display: true, text: 'Lecture Attendance by Module' } },
-                  scales: { y: { beginAtZero: true, title: { display: true, text: 'Lectures' } } },
+                  plugins: {
+                    title: {
+                      display: true,
+                      text: "Lecture Attendance by Module",
+                    },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      title: { display: true, text: "Lectures" },
+                    },
+                  },
                 }}
                 height={100}
               />
@@ -161,7 +209,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
             <CardContent>
               <Pie
                 data={enrollmentChartData}
-                options={{ plugins: { title: { display: true, text: 'Credits by Course' } } }}
+                options={{
+                  plugins: {
+                    title: { display: true, text: "Credits by Course" },
+                  },
+                }}
                 height={100}
               />
             </CardContent>
@@ -173,9 +225,16 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
             <CardContent>
               {progressData && (
                 <>
-                  <Progress value={(progressData.completedCredits / progressData.totalCredits) * 100} />
+                  <Progress
+                    value={
+                      (progressData.completedCredits /
+                        progressData.totalCredits) *
+                      100
+                    }
+                  />
                   <p className="mt-2">
-                    {progressData.completedCredits} / {progressData.totalCredits} Credits Completed
+                    {progressData.completedCredits} /{" "}
+                    {progressData.totalCredits} Credits Completed
                   </p>
                 </>
               )}
@@ -186,7 +245,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
               <CardTitle>Upcoming Lectures</CardTitle>
             </CardHeader>
             <CardContent>
-              {upcomingLectures.length > 0 ? (
+              {upcomingLectures?.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -196,11 +255,13 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {upcomingLectures.map(lecture => (
+                    {upcomingLectures.map((lecture: UpcomingLecture) => (
                       <TableRow key={lecture.lectureId}>
                         <TableCell>{lecture.moduleName}</TableCell>
                         <TableCell>{lecture.venue}</TableCell>
-                        <TableCell>{lecture.time}</TableCell>
+                        <TableCell>
+                          {new Date(lecture.time).toLocaleString()}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
