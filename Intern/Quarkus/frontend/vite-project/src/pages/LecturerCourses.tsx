@@ -16,11 +16,12 @@
 //   TableRow,
 // } from "@/components/ui/table";
 // import { zodResolver } from "@hookform/resolvers/zod";
+// // import { useMutation, useQuery, useQueryClient } from "@ —System: tanstack/react-query";
 // import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 // import axios from "axios";
 // import * as React from "react";
 // import { useState } from "react";
-// import { Controller, useForm } from "react-hook-form";
+// import { useForm } from "react-hook-form";
 // import toast from "react-hot-toast";
 // import { z } from "zod";
 // import { Course, Module } from "../types";
@@ -46,6 +47,8 @@
 //   TooltipProvider,
 //   TooltipTrigger,
 // } from "@/components/ui/tooltip";
+// import { Label } from "@/components/ui/label";
+// import { data } from "react-router-dom";
 
 // interface LecturerCoursesProps {
 //   userId: string;
@@ -153,6 +156,8 @@
 //       toast.success("Module assigned successfully", {
 //         style: { background: "#22c55e", color: "#fff" },
 //       });
+//       // console.log(data);
+//       console.log("Module assigned successfully", data);
 //     },
 //     onError: (error: any) => {
 //       toast.error(error.response?.data?.error || "Failed to assign module", {
@@ -177,30 +182,7 @@
 //             <CardTitle className="text-2xl font-bold">Manage Courses</CardTitle>
 //           </CardHeader>
 //           <CardContent className="space-y-6">
-//             <div>
-//               <FormField
-//                 control={courseForm.control}
-//                 name="courseId"
-//                 render={() => (
-//                   <FormItem className="w-[300px]">
-//                     <FormLabel>Filter by Name</FormLabel>
-//                     <FormControl>
-//                       <Input
-//                         placeholder="Enter course name"
-//                         value={filterName}
-//                         onChange={(e) => {
-//                           setFilterName(e.target.value);
-//                           setPage(0);
-//                         }}
-//                         className="transition-all duration-200 focus:ring-2 focus:ring-primary"
-//                       />
-//                     </FormControl>
-//                   </FormItem>
-//                 )}
-//               />
-//             </div>
-
-//             <Separator />
+            
 
 //             <div>
 //               <h2 className="text-lg font-semibold mb-3">Create Course</h2>
@@ -372,10 +354,30 @@
 //                 </form>
 //               </Form>
 //             </div>
+             
+
+           
 //           </CardContent>
 //         </Card>
+//         <Separator />
+//             <div>
+
+//               <Label htmlFor="filterName">Filter by Name</Label>
+//               <Input
+//                 id="filterName"
+//                 placeholder="Enter course name"
+//                 value={filterName}
+//                 onChange={(e) => {
+//                   setFilterName(e.target.value);
+//                   setPage(0);
+//                 }}
+//                 className="w-[300px] mt-1 transition-all duration-200 focus:ring-2 focus:ring-primary"
+//               />
+//             </div>
 
 //         {coursesLoading || modulesLoading ? (
+
+          
 //           <Card>
 //             <CardContent className="pt-6">
 //               <Skeleton className="h-8 w-full mb-2" />
@@ -476,16 +478,19 @@
 // export default LecturerCourses;
 
 
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import * as React from 'react';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -493,23 +498,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { zodResolver } from "@hookform/resolvers/zod";
-// import { useMutation, useQuery, useQueryClient } from "@ —System: tanstack/react-query";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import * as React from "react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { z } from "zod";
-import { Course, Module } from "../types";
+} from '@/components/ui/table';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -517,16 +516,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/form';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Course, Module } from '../types';
 
 interface LecturerCoursesProps {
   userId: string;
@@ -535,42 +536,42 @@ interface LecturerCoursesProps {
 const courseSchema = z.object({
   courseId: z
     .string()
-    .min(1, "Course ID is required")
-    .max(20, "Course ID must be at most 20 characters"),
+    .min(1, 'Course ID is required')
+    .max(20, 'Course ID must be at most 20 characters'),
   name: z
     .string()
-    .min(1, "Course name is required")
-    .max(100, "Course name must be at most 100 characters"),
-  duration: z.number().min(0, "Duration must be non-negative").optional(),
+    .min(1, 'Course name is required')
+    .max(100, 'Course name must be at most 100 characters'),
+  duration: z.number().min(0, 'Duration must be non-negative').optional(),
 });
 
 const moduleAssignSchema = z.object({
-  moduleId: z.string().min(1, "Module is required"),
-  courseId: z.string().min(1, "Course is required"),
+  moduleId: z.string().min(1, 'Module is required'),
+  courseId: z.string().min(1, 'Course is required'),
 });
 
-const API_URL = "http://localhost:8080";
+const API_URL = 'http://localhost:8080';
 
 const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
   const [page, setPage] = useState(0);
-  const [sortBy, setSortBy] = useState("name");
-  const [sortDir, setSortDir] = useState("asc");
-  const [filterName, setFilterName] = useState("");
+  const [sortBy, setSortBy] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
+  const [filterName, setFilterName] = useState('');
 
   const queryClient = useQueryClient();
 
   const courseForm = useForm({
     resolver: zodResolver(courseSchema),
-    defaultValues: { courseId: "", name: "", duration: 0 },
+    defaultValues: { courseId: '', name: '', duration: 0 },
   });
 
   const moduleForm = useForm({
     resolver: zodResolver(moduleAssignSchema),
-    defaultValues: { moduleId: "", courseId: "" },
+    defaultValues: { moduleId: '', courseId: '' },
   });
 
   const { data: courses, isLoading: coursesLoading } = useQuery({
-    queryKey: ["courses", page, sortBy, sortDir, filterName],
+    queryKey: ['courses', page, sortBy, sortDir, filterName],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/api/course`, {
         params: { offset: page * 10, limit: 10, sortBy, sortDir, filterName },
@@ -580,25 +581,44 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
   });
 
   const { data: modules, isLoading: modulesLoading } = useQuery({
-    queryKey: ["modules"],
+    queryKey: ['modules'],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/api/module`);
       return response.data.data;
     },
   });
 
+  // Fetch modules for each course
+  const { data: courseModules, isLoading: courseModulesLoading } = useQuery({
+    queryKey: ['courseModules', courses?.data],
+    queryFn: async () => {
+      if (!courses?.data) return {};
+      const modulePromises = courses.data.map((course: Course) =>
+        axios
+          .get(`${API_URL}/api/module/course`, {
+            params: { courseId: course.courseId },
+          })
+          .then((response) => ({ [course.courseId]: response.data }))
+          .catch(() => ({ [course.courseId]: [] }))
+      );
+      const moduleResults = await Promise.all(modulePromises);
+      return Object.assign({}, ...moduleResults);
+    },
+    enabled: !!courses?.data,
+  });
+
   const createCourseMutation = useMutation({
     mutationFn: (data: Course) => axios.post(`${API_URL}/api/course`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
       courseForm.reset();
-      toast.success("Course created successfully", {
-        style: { background: "#22c55e", color: "#fff" },
+      toast.success('Course created successfully', {
+        style: { background: '#22c55e', color: '#fff' },
       });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || "Failed to create course", {
-        style: { background: "#ef4444", color: "#fff" },
+      toast.error(error.response?.data?.error || 'Failed to create course', {
+        style: { background: '#ef4444', color: '#fff' },
       });
     },
   });
@@ -607,14 +627,14 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
     mutationFn: (courseId: string) =>
       axios.delete(`${API_URL}/api/course/${courseId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success("Course deleted successfully", {
-        style: { background: "#22c55e", color: "#fff" },
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      toast.success('Course deleted successfully', {
+        style: { background: '#22c55e', color: '#fff' },
       });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || "Failed to delete course", {
-        style: { background: "#ef4444", color: "#fff" },
+      toast.error(error.response?.data?.error || 'Failed to delete course', {
+        style: { background: '#ef4444', color: '#fff' },
       });
     },
   });
@@ -629,15 +649,15 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
         }
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      queryClient.invalidateQueries({ queryKey: ['courses', 'courseModules'] });
       moduleForm.reset();
-      toast.success("Module assigned successfully", {
-        style: { background: "#22c55e", color: "#fff" },
+      toast.success('Module assigned successfully', {
+        style: { background: '#22c55e', color: '#fff' },
       });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || "Failed to assign module", {
-        style: { background: "#ef4444", color: "#fff" },
+      toast.error(error.response?.data?.error || 'Failed to assign module', {
+        style: { background: '#ef4444', color: '#fff' },
       });
     },
   });
@@ -658,8 +678,6 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
             <CardTitle className="text-2xl font-bold">Manage Courses</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            
-
             <div>
               <h2 className="text-lg font-semibold mb-3">Create Course</h2>
               <Form {...courseForm}>
@@ -731,8 +749,8 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
                           className="w-full"
                         >
                           {createCourseMutation.isPending
-                            ? "Creating..."
-                            : "Add Course"}
+                            ? 'Creating...'
+                            : 'Add Course'}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Create a new course</TooltipContent>
@@ -820,8 +838,8 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
                           className="w-full"
                         >
                           {assignModuleMutation.isPending
-                            ? "Assigning..."
-                            : "Assign Module"}
+                            ? 'Assigning...'
+                            : 'Assign Module'}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Assign module to a course</TooltipContent>
@@ -830,30 +848,26 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
                 </form>
               </Form>
             </div>
-             
-
-           
           </CardContent>
         </Card>
+
         <Separator />
-            <div>
 
-              <Label htmlFor="filterName">Filter by Name</Label>
-              <Input
-                id="filterName"
-                placeholder="Enter course name"
-                value={filterName}
-                onChange={(e) => {
-                  setFilterName(e.target.value);
-                  setPage(0);
-                }}
-                className="w-[300px] mt-1 transition-all duration-200 focus:ring-2 focus:ring-primary"
-              />
-            </div>
+        <div>
+          <Label htmlFor="filterName">Filter by Name</Label>
+          <Input
+            id="filterName"
+            placeholder="Enter course name"
+            value={filterName}
+            onChange={(e) => {
+              setFilterName(e.target.value);
+              setPage(0);
+            }}
+            className="w-[300px] mt-1 transition-all duration-200 focus:ring-2 focus:ring-primary"
+          />
+        </div>
 
-        {coursesLoading || modulesLoading ? (
-
-          
+        {coursesLoading || modulesLoading || courseModulesLoading ? (
           <Card>
             <CardContent className="pt-6">
               <Skeleton className="h-8 w-full mb-2" />
@@ -870,22 +884,23 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
                     <TableHead
                       className="cursor-pointer hover:bg-muted transition-colors"
                       onClick={() => {
-                        setSortBy("courseId");
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
+                        setSortBy('courseId');
+                        setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
                       }}
                     >
-                      ID {sortBy === "courseId" && (sortDir === "asc" ? "↑" : "↓")}
+                      ID {sortBy === 'courseId' && (sortDir === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
                       className="cursor-pointer hover:bg-muted transition-colors"
                       onClick={() => {
-                        setSortBy("name");
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
+                        setSortBy('name');
+                        setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
                       }}
                     >
-                      Name {sortBy === "name" && (sortDir === "asc" ? "↑" : "↓")}
+                      Name {sortBy === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead>Duration</TableHead>
+                    <TableHead>Modules</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -899,6 +914,17 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
                       <TableCell>{course.name}</TableCell>
                       <TableCell>{course.duration}</TableCell>
                       <TableCell>
+                        {courseModules?.[course.courseId]?.length > 0 ? (
+                          courseModules[course.courseId].map((module: Module) => (
+                            <Badge key={module.moduleId} variant="secondary" className="mr-1">
+                              {module.name}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground">No modules assigned</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -910,8 +936,8 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
                               aria-label={`Delete course ${course.name}`}
                             >
                               {deleteCourseMutation.isPending
-                                ? "Deleting..."
-                                : "Delete"}
+                                ? 'Deleting...'
+                                : 'Delete'}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Delete this course</TooltipContent>
@@ -923,7 +949,7 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
               </Table>
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Page {page + 1} of{" "}
+                  Page {page + 1} of{' '}
                   {courses?.data?.length < 10 ? page + 1 : page + 2}
                 </div>
                 <div className="flex gap-2">

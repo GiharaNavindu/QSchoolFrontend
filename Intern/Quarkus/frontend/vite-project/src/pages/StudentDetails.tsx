@@ -5,10 +5,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import * as React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 import { Student } from "../types";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface StudentDetailsProps {
   userId: string;
@@ -39,10 +54,38 @@ const studentSchema = z.object({
   batch: z.string().max(50, "Batch must be at most 50 characters").optional(),
 });
 
-const API_URL =  "http://localhost:8080";
+const API_URL = "http://localhost:8080";
 
 const StudentDetails: React.FC<StudentDetailsProps> = ({ userId }) => {
   const queryClient = useQueryClient();
+
+  // const form = useForm({
+  //   resolver: zodResolver(studentSchema),
+  //   defaultValues: {
+  //     studentId: "",
+  //     firstName: "",
+  //     lastName: "",
+  //     email: "",
+  //     dob: "",
+  //     address: "",
+  //     batch: "",
+  //   },
+  // });
+
+
+  const form = useForm({
+    resolver: zodResolver(studentSchema),
+    defaultValues:{
+      studentId:"",
+      firstName:"",
+      lastName:"",
+      email:"",
+      dob:"",
+      batch:"",
+      address:""
+
+    },
+  });
 
   const { data: student, isLoading } = useQuery({
     queryKey: ["student", userId],
@@ -52,22 +95,9 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({ userId }) => {
     },
   });
 
-  const { control, handleSubmit, reset } = useForm({
-    resolver: zodResolver(studentSchema),
-    defaultValues: {
-      studentId: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      dob: "",
-      address: "",
-      batch: "",
-    },
-  });
-
   React.useEffect(() => {
     if (student) {
-      reset({
+      form.reset({
         studentId: student.studentId,
         firstName: student.firstName,
         lastName: student.lastName,
@@ -77,17 +107,21 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({ userId }) => {
         batch: student.batch || "",
       });
     }
-  }, [student, reset]);
+  }, [student, form.reset]);
 
   const updateMutation = useMutation({
     mutationFn: (data: Student) =>
       axios.put(`${API_URL}/api/student/${userId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["student", userId]);
-      toast.success("Profile updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["student", userId] });
+      toast.success("Profile updated successfully", {
+        style: { background: "#22c55e", color: "#fff" },
+      });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || "Failed to update profile");
+      toast.error(error.response?.data?.error || "Failed to update profile", {
+        style: { background: "#ef4444", color: "#fff" },
+      });
     },
   });
 
@@ -95,125 +129,185 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({ userId }) => {
     updateMutation.mutate(data);
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <Skeleton className="h-8 w-[200px] mb-4" />
+        <Card>
+          <CardContent className="pt-6">
+            <Skeleton className="h-8 w-full mb-2" />
+            <Skeleton className="h-8 w-full mb-2" />
+            <Skeleton className="h-8 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Student Profile</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Update Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <Controller
-              name="studentId"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="Student ID" disabled />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+    <TooltipProvider>
+      <div className="p-6 max-w-7xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Student Profile</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="studentId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Student ID</FormLabel>
+                      <FormControl>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Input
+                              {...field}
+                              placeholder="Student ID"
+                              disabled
+                              className="transition-all duration-200"
+                              aria-disabled="true"
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>Student ID cannot be edited</TooltipContent>
+                        </Tooltip>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              )}
-            />
-            <Controller
-              name="firstName"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="First Name" />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter first name"
+                          className="transition-all duration-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              )}
-            />
-            <Controller
-              name="lastName"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="Last Name" />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter last name"
+                          className="transition-all duration-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              )}
-            />
-            <Controller
-              name="email"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="Email" type="email" />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="Enter email"
+                          className="transition-all duration-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              )}
-            />
-            <Controller
-              name="dob"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="Date of Birth (YYYY-MM-DD)" />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="dob"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date of Birth</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="date"
+                          placeholder="YYYY-MM-DD"
+                          className="transition-all duration-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              )}
-            />
-            <Controller
-              name="address"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="Address" />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter address"
+                          className="transition-all duration-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              )}
-            />
-            <Controller
-              name="batch"
-              control={control}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Input {...field} placeholder="Batch" />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">
-                      {fieldState.error.message}
-                    </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="batch"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Batch </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter batch"
+                          className="transition-all duration-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+                <div className="flex items-end">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="submit"
+                        disabled={updateMutation.isPending}
+                        className="w-full md:w-auto"
+                        aria-label="Update student profile"
+                      >
+                        {updateMutation.isPending
+                          ? "Updating..."
+                          : "Update Profile"}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Save changes to student profile</TooltipContent>
+                  </Tooltip>
                 </div>
-              )}
-            />
-            <Button type="submit" disabled={updateMutation.isLoading}>
-              Update Profile
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
   );
 };
 

@@ -21,8 +21,8 @@ export interface Course {
 export interface Enrolls {
   enrollmentId: number;
   enrollmentDate: string;
-  student: Student;
-  course: Course;
+  studentId: string;
+  courseId: String;
 }
 
 export interface Module {
@@ -46,14 +46,23 @@ export interface Lecturer {
   lectures?: Lecture[];
 }
 
+// export interface Lecture {
+//   lectureId: number;
+//   venue?: string;
+//   attendanceCount?: number;
+//   time: string;
+//   lecturer?: Lecturer;
+//   module?: Module;
+//   students?: Student[];
+// }
+
 export interface Lecture {
   lectureId: number;
   venue?: string;
   attendanceCount?: number;
   time: string;
-  lecturer?: Lecturer;
-  module?: Module;
-  students?: Student[];
+  lecturerid?: string;
+  moduleId?: string;
 }
 
 export interface AttendanceData {
@@ -75,6 +84,15 @@ export interface UpcomingLecture {
   time: string;
 }
 
+
+
+export interface StudentDetails {
+  studentId;string,
+  firstName: string;
+  lastName: string;
+  email: string;
+  age?: number;}
+
 export interface Attendance {
   attendanceId: number;
   student: Student;
@@ -82,3 +100,4 @@ export interface Attendance {
   attended: boolean;
   markedAt?: string;
 }
+
