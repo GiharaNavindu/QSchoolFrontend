@@ -160,6 +160,10 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
     queryKey: ['modules', userId],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/api/module/lecturer/${userId}`);
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch modules');
+      }
+      console.log('Modules fetched:', response.data);
       return response.data;
     },
   });
