@@ -15,7 +15,7 @@ import StudentEnrollments from "./pages/StudentEnrollment";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
-  const [role, setRole] = useState<string>("Lecturer"); 
+  const [role, setRole] = useState<string>("Lecturer"); // Change to "Student" for student rol
   const [userId, setUserId] = useState<string>("LEC001");
 
   return (

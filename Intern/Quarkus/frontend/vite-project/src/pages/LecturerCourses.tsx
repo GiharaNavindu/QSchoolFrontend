@@ -588,24 +588,42 @@ const LecturerCourses: React.FC<LecturerCoursesProps> = ({ userId }) => {
     },
   });
 
-  // Fetch modules for each course
+  // // Fetch modules for each course
+  // const { data: courseModules, isLoading: courseModulesLoading } = useQuery({
+  //   queryKey: ['courseModules', courses?.data],
+  //   queryFn: async () => {
+  //     if (!courses?.data) return {};
+  //     const modulePromises = courses.data.map((course: Course) =>
+  //       axios
+  //         .get(`${API_URL}/api/module/course`, {
+  //           params: { courseId: course.courseId },
+  //         })
+  //         .then((response) => ({ [course.courseId]: response.data }))
+  //         .catch(() => ({ [course.courseId]: [] }))
+  //     );
+  //     const moduleResults = await Promise.all(modulePromises);
+  //     return Object.assign({}, ...moduleResults);
+  //   },
+  //   enabled: !!courses?.data,
+  // });
+
   const { data: courseModules, isLoading: courseModulesLoading } = useQuery({
-    queryKey: ['courseModules', courses?.data],
-    queryFn: async () => {
-      if (!courses?.data) return {};
-      const modulePromises = courses.data.map((course: Course) =>
-        axios
-          .get(`${API_URL}/api/module/course`, {
-            params: { courseId: course.courseId },
-          })
-          .then((response) => ({ [course.courseId]: response.data }))
-          .catch(() => ({ [course.courseId]: [] }))
-      );
-      const moduleResults = await Promise.all(modulePromises);
-      return Object.assign({}, ...moduleResults);
-    },
-    enabled: !!courses?.data,
-  });
+  queryKey: ['courseModules', courses?.data],
+  queryFn: async () => {
+    if (!courses?.data) return {};
+    const modulePromises = courses.data.map((course: Course) =>
+      axios
+        .get(`${API_URL}/api/module/course`, {
+          params: { courseId: course.courseId },
+        })
+        .then((response) => ({ [course.courseId]: response.data }))
+        .catch(() => ({ [course.courseId]: [] }))
+    );
+    const moduleResults = await Promise.all(modulePromises);
+    return Object.assign({}, ...moduleResults);
+  },
+  enabled: !!courses?.data,
+});
 
   const createCourseMutation = useMutation({
     mutationFn: (data: Course) => axios.post(`${API_URL}/api/course`, data),
