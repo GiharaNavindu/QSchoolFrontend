@@ -174,7 +174,10 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
         borderWidth: 1,
       },
     ],
+ 
   };
+
+  console.log("Enrollment chart data:", enrollmentChartData);
 
   // Prepare data for the attendance chart
   const attendanceChartData = {
@@ -306,30 +309,34 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
           </Card> */}
 
           {/* Course Enrollment Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Course Enrollment Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-  {enrollments?.length > 0 ? (
-    <Bar
-      data={enrollmentChartData}
-      options={{
-        indexAxis: "x", // ensures vertical bars
-        plugins: {
-          title: { display: true, text: "Credits by Course" },
-          legend: { display: false },
-        },
-        responsive: true,
-        maintainAspectRatio: false,
-      }}
-      height={200}
-    />
-  ) : (
-    <p>No enrollment data available for chart.</p>
-  )}
-</CardContent>
-          </Card>
+          {/* Course Enrollment Distribution (Pie Chart) */}
+<Card>
+  <CardHeader>
+    <CardTitle>Course Credit Distribution (Pie Chart)</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {enrollments?.length > 0 ? (
+      <Pie
+        data={enrollmentChartData}
+        options={{
+          plugins: {
+            title: {
+              display: true,
+              text: "Credits by Course (Pie View)",
+            },
+            legend: {
+              position: "right",
+            },
+          },
+        }}
+        height={200}
+      />
+    ) : (
+      <p>No enrollment data available for chart.</p>
+    )}
+  </CardContent>
+</Card>
+
 
           {/* Academic Progress */}
           <Card>
