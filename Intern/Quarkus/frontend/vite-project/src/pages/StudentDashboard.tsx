@@ -214,7 +214,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
-      <p className="mb-4">Logged in as Student ID: {effectiveUserId}</p>
+      
 
       {studentLoading ||
       enrollmentsLoading ||

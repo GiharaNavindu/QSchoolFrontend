@@ -283,7 +283,7 @@ const LecturerAttendance: React.FC<LecturerAttendanceProps> = ({ userId = 'LEC00
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Manage Attendance</h1>
-      <p className="mb-4">Logged in as Lecturer ID: {userId}</p>
+   
 
       {/* Lecture Creation Form */}
       <Card className="mb-6">
