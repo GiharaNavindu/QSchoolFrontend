@@ -21,7 +21,7 @@ interface Module {
 interface Lecture {
   lectureId: number;
   moduleId: string;
-  module: { name: string };
+  module: { name: string } | null; 
   venue: string;
   time: string;
 }
@@ -55,6 +55,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
         setLoading(true);
         const response = await axios.get(`http://localhost:8080/api/enroll/student/${userId}`);
         setEnrollments(response.data);
+        console.log("Fetched Enrollments:", response.data);
       } catch (err) {
         setError("Failed to fetch enrollments.");
       } finally {
@@ -72,12 +73,14 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
           setLoading(true);
           const response = await axios.get(`http://localhost:8080/api/module/course?courseId=${selectedCourse}`);
           setModules(response.data);
+          console.log("Fetched Modules:", response.data);
           setSelectedModule("");
           setLectures([]);
           setSelectedLecture("");
           setAttendanceData([]);
         } catch (err) {
           setError("Failed to fetch modules.");
+          console.log("Module fetch error:", err);
         } finally {
           setLoading(false);
         }
@@ -93,11 +96,13 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
         try {
           setLoading(true);
           const response = await axios.get(`http://localhost:8080/api/lecture?filterModule=${selectedModule}`);
-          setLectures(response.data.data);
+          setLectures(response.data.data || []); 
+          console.log("Fetched Lectures:", response.data.data);
           setSelectedLecture("");
           setAttendanceData([]);
         } catch (err) {
           setError("Failed to fetch lectures.");
+          console.error("Lecture fetch error:", err);
         } finally {
           setLoading(false);
         }
@@ -114,6 +119,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
           setLoading(true);
           const response = await axios.get(`http://localhost:8080/api/attendance/student/${userId}`);
           setAttendanceData(response.data);
+          console.log("Fetched Attendance Data:", response.data);
         } catch (err) {
           setError("Failed to fetch attendance data.");
         } finally {
@@ -134,7 +140,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
           {loading && <Loader2 className="animate-spin" />}
           {error && <p className="text-red-500">{error}</p>}
           
-          {/* Course Selection */}
+          Course Selection
           <div className="mb-4">
             <Select onValueChange={setSelectedCourse} value={selectedCourse}>
               <SelectTrigger className="w-[200px]">
@@ -143,14 +149,14 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
               <SelectContent>
                 {enrollments.map((enrollment) => (
                   <SelectItem key={enrollment.courseId} value={enrollment.courseId}>
-                    {enrollment.course.name}
+                    {/* {enrollment.course.name} */}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Module Selection */}
+          Module Selection
           {selectedCourse && (
             <div className="mb-4">
               <Select onValueChange={setSelectedModule} value={selectedModule}>
@@ -178,7 +184,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ userId }) => {
                 <SelectContent>
                   {lectures.map((lecture) => (
                     <SelectItem key={lecture.lectureId} value={String(lecture.lectureId)}>
-                      {lecture.module.name} - {lecture.venue} ({new Date(lecture.time).toLocaleString()})
+                      {lecture.module?.name || "Unnamed Module"} - {lecture.venue} ({new Date(lecture.time).toLocaleString()})
                     </SelectItem>
                   ))}
                 </SelectContent>
