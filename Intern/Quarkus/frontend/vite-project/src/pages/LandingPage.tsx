@@ -6,11 +6,12 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col justify-center items-center text-center py-16 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-        <h1 className="text-5xl font-bold mb-4">Welcome to the Student Management System</h1>
-        <p className="text-xl mb-8 max-w-2xl">
-          Empowering education with seamless management of students, lecturers, courses, and attendance. Log in to access your dashboard or sign up as a lecturer.
-        </p>
+      <section className="flex-1 flex flex-col justify-center items-center text-center py-16 bg-yellow-100  text-black">
+        <h1 className="text-5xl font-bold mb-4">Shape the Future with Smart Student Management</h1>
+<p className="text-xl mb-8 max-w-2xl">
+  Streamline your academic journey — track students, connect with lecturers, manage courses, and monitor attendance effortlessly. Dive in to access your dashboard or join us as a visionary lecturer.
+</p>
+
         <div className="space-x-4">
           <Link to="/login">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-200">
