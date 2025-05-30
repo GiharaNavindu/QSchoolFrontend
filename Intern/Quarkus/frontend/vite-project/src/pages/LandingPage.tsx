@@ -4,37 +4,57 @@ import { Button } from "@/components/ui/button";
 import Calendar from "react-calendar";
 import 'react-calendar/dist/Calendar.css';
 
-const LandingPage: React.FC = () => {
-  const [date, setDate] = React.useState(new Date());
-  const [time, setTime] = React.useState(new Date());
+const features = [
+  "Manage Courses with Ease",
+  "Track Attendance Instantly",
+  "Monitor Student Progress",
+  "Connect with Lecturers",
+  "Analyze Academic Data",
+  "Streamlined Admin Workflow",
+  "Secure and Scalable System",
+  "24/7 Support and Updates",
+  "Personalized Dashboards",
+  "Multidevice Accessibility",
+];
 
-  // Clock update every second
+const LandingPage: React.FC = () => {
+  const [time, setTime] = React.useState(new Date());
+  const [date, setDate] = React.useState(new Date());
+
   React.useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  const scrollItems = Array.from({ length: 20 }, (_, i) => ({
-    title: `Feature ${i + 1}`,
-    description: "This is a brief explanation of this feature."
-  }));
+  const getRotationStyle = (angle: number) => ({
+    transform: `rotate(${angle}deg)`,
+    transformOrigin: 'bottom center',
+  });
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-[#F3F4F6] text-[#111827] flex flex-col">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-yellow-100 to-white text-black py-20 text-center">
-        <h1 className="text-5xl font-extrabold mb-4">Shape the Future with Smart Student Management</h1>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          Track students, connect with lecturers, manage courses, and monitor attendance effortlessly.
+      <section className="flex-1 flex flex-col justify-center items-center text-center py-20 bg-gradient-to-r from-blue-50 to-white">
+        <h1 className="text-5xl font-bold mb-6 text-[#1E3A8A]">
+          Shape the Future with Smart Student Management
+        </h1>
+        <p className="text-xl mb-10 max-w-3xl text-[#374151]">
+          Streamline your academic journey — track students, connect with lecturers,
+          manage courses, and monitor attendance effortlessly.
         </p>
+
         <div className="space-x-4">
           <Link to="/login">
-            <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700">
+            <Button size="lg" className="bg-[#1E3A8A] text-white hover:bg-[#1D4ED8] transition">
               Student Login
             </Button>
           </Link>
           <Link to="/lecturer-signin">
-            <Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition"
+            >
               Lecturer Sign-In
             </Button>
           </Link>
@@ -42,38 +62,56 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Clock & Calendar Section */}
-      <section className="bg-white py-10 flex flex-col md:flex-row justify-around items-center gap-10">
+      <section className="py-14 bg-white flex flex-col md:flex-row justify-around items-center gap-10 shadow-inner">
+        {/* Wall Clock */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-2">Current Time</h2>
-          <p className="text-4xl font-mono">{time.toLocaleTimeString()}</p>
+          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-4">Wall Clock</h2>
+          <div className="w-40 h-40 rounded-full border-4 border-blue-700 relative flex items-center justify-center bg-white shadow-lg">
+            {/* Hour Hand */}
+            <div
+              className="absolute w-1 h-10 bg-blue-800"
+              style={getRotationStyle((time.getHours() % 12) * 30 + time.getMinutes() * 0.5)}
+            />
+            {/* Minute Hand */}
+            <div
+              className="absolute w-1 h-16 bg-blue-500"
+              style={getRotationStyle(time.getMinutes() * 6)}
+            />
+            {/* Second Hand */}
+            <div
+              className="absolute w-0.5 h-20 bg-red-500"
+              style={getRotationStyle(time.getSeconds() * 6)}
+            />
+            {/* Center dot */}
+            <div className="absolute w-3 h-3 bg-black rounded-full z-10" />
+          </div>
         </div>
+
+        {/* Calendar */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-4">Academic Calendar</h2>
+          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-4">Calendar</h2>
           <Calendar
             onChange={setDate}
             value={date}
-            className="rounded-md shadow-md"
+            className="rounded-md shadow-md p-4"
           />
         </div>
       </section>
 
-      {/* Infinite Scroll / Features Section */}
-      <section className="bg-gray-100 py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">Key Features</h2>
-          <div className="h-96 overflow-y-auto space-y-4 border p-4 rounded-md bg-white shadow-inner">
-            {scrollItems.map((item, index) => (
-              <div key={index} className="p-4 border-b">
-                <h3 className="text-xl font-semibold">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </div>
-            ))}
-          </div>
+      {/* Features Section with Infinite Scroll */}
+      <section className="py-16 bg-[#F9FAFB]">
+        <h2 className="text-3xl font-bold text-center mb-8 text-[#1E3A8A]">System Highlights</h2>
+        <div className="max-w-4xl mx-auto h-64 overflow-y-scroll border p-6 rounded-lg bg-white shadow-md space-y-4 scroll-smooth">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="p-4 border-b text-lg text-[#374151]">
+              {features[i % features.length]}
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-4 bg-gray-800 text-white text-center">
+      <footer className="py-6 bg-[#0F172A] text-white text-center">
         <p>&copy; 2025 Student Management System. All rights reserved.</p>
       </footer>
     </div>
