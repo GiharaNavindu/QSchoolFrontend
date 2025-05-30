@@ -8,15 +8,17 @@ import LecturerAttendance from "./pages/LecturerAttendance";
 import LecturerCourses from "./pages/LecturerCourses";
 import LecturerDashboard from "./pages/LecturerDasboard";
 import LecturerStudents from "./pages/LecturerStudents";
+import StudentAttendance from "./pages/StudentAttendance";
 import StudentDashboard from "./pages/StudentDashboard";
 import StudentDetails from "./pages/StudentDetails";
 import StudentEnrollments from "./pages/StudentEnrollment";
+import LandingPage from "./pages/LandingPage";
 
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
-  const [role, setRole] = useState<string>("Lecturer"); // Change to "Student" for student rol
-  const [userId, setUserId] = useState<string>("LEC001");
+  const [role, setRole] = useState<string>("Student"); // Change to "Student" for student rol
+  const [userId, setUserId] = useState<string>("STU001");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -33,6 +35,11 @@ const App: React.FC = () => {
                 path="/student/:userId/details"
                 element={<StudentDetails userId={userId} />}
               />
+              <Route
+                path="/student/:userId/attendance"
+                element={<StudentAttendance userId={userId} />}
+              />
+              <Route path="/" element={<LandingPage />} />
               <Route
                 path="/student/:userId/enrollments"
                 element={<StudentEnrollments userId={userId} />}
