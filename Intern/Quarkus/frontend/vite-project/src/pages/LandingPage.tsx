@@ -1,51 +1,73 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import Calendar from "react-calendar";
+import 'react-calendar/dist/Calendar.css';
 
 const LandingPage: React.FC = () => {
+  const [date, setDate] = React.useState(new Date());
+  const [time, setTime] = React.useState(new Date());
+
+  // Clock update every second
+  React.useEffect(() => {
+    const interval = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const scrollItems = Array.from({ length: 20 }, (_, i) => ({
+    title: `Feature ${i + 1}`,
+    description: "This is a brief explanation of this feature."
+  }));
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col justify-center items-center text-center py-16 bg-yellow-100  text-black">
-        <h1 className="text-5xl font-bold mb-4">Shape the Future with Smart Student Management</h1>
-<p className="text-xl mb-8 max-w-2xl">
-  Streamline your academic journey — track students, connect with lecturers, manage courses, and monitor attendance effortlessly. Dive in to access your dashboard or join us as a visionary lecturer.
-</p>
-
+      <section className="bg-gradient-to-r from-yellow-100 to-white text-black py-20 text-center">
+        <h1 className="text-5xl font-extrabold mb-4">Shape the Future with Smart Student Management</h1>
+        <p className="text-xl mb-8 max-w-2xl mx-auto">
+          Track students, connect with lecturers, manage courses, and monitor attendance effortlessly.
+        </p>
         <div className="space-x-4">
           <Link to="/login">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-200">
+            <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700">
               Student Login
             </Button>
           </Link>
           <Link to="/lecturer-signin">
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
+            <Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white">
               Lecturer Sign-In
             </Button>
           </Link>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div>
-            <h3 className="text-2xl font-semibold mb-2">Manage Courses</h3>
-            <p className="text-gray-600">
-              Easily create, update, and track courses and their modules.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold mb-2">Track Attendance</h3>
-            <p className="text-gray-600">
-              Monitor student attendance for each lecture effortlessly.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold mb-2">Student Progress</h3>
-            <p className="text-gray-600">
-              View enrollment and progress details for every student.
-            </p>
+      {/* Clock & Calendar Section */}
+      <section className="bg-white py-10 flex flex-col md:flex-row justify-around items-center gap-10">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Current Time</h2>
+          <p className="text-4xl font-mono">{time.toLocaleTimeString()}</p>
+        </div>
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">Academic Calendar</h2>
+          <Calendar
+            onChange={setDate}
+            value={date}
+            className="rounded-md shadow-md"
+          />
+        </div>
+      </section>
+
+      {/* Infinite Scroll / Features Section */}
+      <section className="bg-gray-100 py-16 px-4">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-8">Key Features</h2>
+          <div className="h-96 overflow-y-auto space-y-4 border p-4 rounded-md bg-white shadow-inner">
+            {scrollItems.map((item, index) => (
+              <div key={index} className="p-4 border-b">
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="text-gray-600">{item.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
