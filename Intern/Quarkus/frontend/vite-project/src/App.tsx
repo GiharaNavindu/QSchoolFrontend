@@ -17,8 +17,8 @@ import StudentEnrollments from "./pages/StudentEnrollment";
 const queryClient = new QueryClient(); //querclient is the client that will be used to fetch data from the server
 
 const AppContent: React.FC = () => {
-  const [role, setRole] = useState<string>("Lecturer");
-  const [userId, setUserId] = useState<string>("LEC001");
+  const [role, setRole] = useState<string>("Student"); // State to manage the role of the user, default is "Student"
+  const [userId, setUserId] = useState<string>("STU002");
   const location = useLocation();
   const hideSideBarRoutes = ["/"]; // Define routes where the sidebar should not be shown
   const shouldSideBar = !hideSideBarRoutes.includes(location.pathname); // Determine if the sidebar should be shown based on the current route
