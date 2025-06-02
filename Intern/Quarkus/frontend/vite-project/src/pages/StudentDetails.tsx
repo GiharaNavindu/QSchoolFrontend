@@ -1,14 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { z } from "zod";
-import { Student } from "../types";
 import {
   Form,
   FormControl,
@@ -17,13 +8,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { z } from "zod";
+import { Student } from "../types";
 
 interface StudentDetailsProps {
   userId: string;
@@ -72,18 +71,16 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({ userId }) => {
   //   },
   // });
 
-
   const form = useForm({
     resolver: zodResolver(studentSchema),
-    defaultValues:{
-      studentId:"",
-      firstName:"",
-      lastName:"",
-      email:"",
-      dob:"",
-      batch:"",
-      address:""
-
+    defaultValues: {
+      studentId: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      dob: "",
+      batch: "",
+      address: "",
     },
   });
 
@@ -145,169 +142,188 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({ userId }) => {
   }
 
   return (
-    <TooltipProvider>
-      <div className="p-6 max-w-7xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Student Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="studentId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Student ID</FormLabel>
-                      <FormControl>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Input
-                              {...field}
-                              placeholder="Student ID"
-                              disabled
-                              className="transition-all duration-200"
-                              aria-disabled="true"
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>Student ID cannot be edited</TooltipContent>
-                        </Tooltip>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter first name"
-                          className="transition-all duration-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter last name"
-                          className="transition-all duration-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="Enter email"
-                          className="transition-all duration-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dob"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date of Birth</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="date"
-                          placeholder="YYYY-MM-DD"
-                          className="transition-all duration-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter address"
-                          className="transition-all duration-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="batch"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Batch </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter batch"
-                          className="transition-all duration-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex items-end">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="submit"
-                        disabled={updateMutation.isPending}
-                        className="w-full md:w-auto"
-                        aria-label="Update student profile"
-                      >
-                        {updateMutation.isPending
-                          ? "Updating..."
-                          : "Update Profile"}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Save changes to student profile</TooltipContent>
-                  </Tooltip>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-    </TooltipProvider>
+    // <TooltipProvider>
+    <div className="p-6 max-w-5xl mx-auto bg-[#F3F4F6] min-h-screen">
+      <Card className="shadow-xl rounded-2xl">
+        <CardHeader className="bg-gradient-to-r from-blue-100 to-white rounded-t-2xl px-6 py-5">
+          <CardTitle className="text-3xl font-semibold text-[#1E3A8A]">
+            Student Profile
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              {/* STUDENT ID */}
+              <FormField
+                control={form.control}
+                name="studentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">Student ID</FormLabel>
+                    <FormControl>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Input
+                            {...field}
+                            disabled
+                            className="bg-gray-100 text-gray-600 border-gray-300 cursor-not-allowed"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Student ID cannot be edited
+                        </TooltipContent>
+                      </Tooltip>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* FIRST NAME */}
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">First Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Enter first name"
+                        className="transition border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* LAST NAME */}
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">Last Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Enter last name"
+                        className="transition border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* EMAIL */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="Enter email"
+                        className="transition border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* DOB */}
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">
+                      Date of Birth
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        className="transition border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* ADDRESS */}
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">Address</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Enter address"
+                        className="transition border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* BATCH */}
+              <FormField
+                control={form.control}
+                name="batch"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#1E3A8A]">Batch</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Enter batch"
+                        className="transition border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* SUBMIT BUTTON */}
+              <div className="md:col-span-2 flex justify-end mt-4">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="submit"
+                      disabled={updateMutation.isPending}
+                      className="bg-[#1E3A8A] hover:bg-[#1D4ED8] text-white px-6 py-2 rounded-md shadow-sm transition"
+                    >
+                      {updateMutation.isPending
+                        ? "Updating..."
+                        : "Update Profile"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Save changes to student profile
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+    // </TooltipProvider>
   );
 };
 

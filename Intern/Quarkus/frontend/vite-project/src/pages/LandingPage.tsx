@@ -1,8 +1,8 @@
-import * as React from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import * as React from "react";
 import Calendar from "react-calendar";
-import 'react-calendar/dist/Calendar.css';
+import "react-calendar/dist/Calendar.css";
+import { Link } from "react-router-dom";
 
 const features = [
   "Manage Courses with Ease",
@@ -28,7 +28,7 @@ const LandingPage: React.FC = () => {
 
   const getRotationStyle = (angle: number) => ({
     transform: `rotate(${angle}deg)`,
-    transformOrigin: 'bottom center',
+    transformOrigin: "bottom center",
   });
 
   return (
@@ -39,13 +39,16 @@ const LandingPage: React.FC = () => {
           Shape the Future with Smart Student Management
         </h1>
         <p className="text-xl mb-10 max-w-3xl text-[#374151]">
-          Streamline your academic journey — track students, connect with lecturers,
-          manage courses, and monitor attendance effortlessly.
+          Streamline your academic journey — track students, connect with
+          lecturers, manage courses, and monitor attendance effortlessly.
         </p>
 
         <div className="space-x-4">
           <Link to="/login">
-            <Button size="lg" className="bg-[#1E3A8A] text-white hover:bg-[#1D4ED8] transition">
+            <Button
+              size="lg"
+              className="bg-[#1E3A8A] text-white hover:bg-[#1D4ED8] transition"
+            >
               Student Login
             </Button>
           </Link>
@@ -65,12 +68,16 @@ const LandingPage: React.FC = () => {
       <section className="py-14 bg-white flex flex-col md:flex-row justify-around items-center gap-10 shadow-inner">
         {/* Wall Clock */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-4">Wall Clock</h2>
+          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-4">
+            Wall Clock
+          </h2>
           <div className="w-40 h-40 rounded-full border-4 border-blue-700 relative flex items-center justify-center bg-white shadow-lg">
             {/* Hour Hand */}
             <div
               className="absolute w-1 h-10 bg-blue-800"
-              style={getRotationStyle((time.getHours() % 12) * 30 + time.getMinutes() * 0.5)}
+              style={getRotationStyle(
+                (time.getHours() % 12) * 30 + time.getMinutes() * 0.5
+              )}
             />
             {/* Minute Hand */}
             <div
@@ -89,7 +96,9 @@ const LandingPage: React.FC = () => {
 
         {/* Calendar */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-4">Calendar</h2>
+          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-4">
+            Calendar
+          </h2>
           <Calendar
             onChange={setDate}
             value={date}
@@ -100,7 +109,9 @@ const LandingPage: React.FC = () => {
 
       {/* Features Section with Infinite Scroll */}
       <section className="py-16 bg-[#F9FAFB]">
-        <h2 className="text-3xl font-bold text-center mb-8 text-[#1E3A8A]">System Highlights</h2>
+        <h2 className="text-3xl font-bold text-center mb-8 text-[#1E3A8A]">
+          System Highlights
+        </h2>
         <div className="max-w-4xl mx-auto h-64 overflow-y-scroll border p-6 rounded-lg bg-white shadow-md space-y-4 scroll-smooth">
           {Array.from({ length: 20 }).map((_, i) => (
             <div key={i} className="p-4 border-b text-lg text-[#374151]">

@@ -1,15 +1,420 @@
+// import * as React from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import axios from 'axios';
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+// } from '@/components/ui/card';
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from '@/components/ui/table';
+// import { Button } from '@/components/ui/button';
+// import { Badge } from '@/components/ui/badge';
+// import { Skeleton } from '@/components/ui/skeleton';
+// import { Module, Lecture, Attendance, Student } from '../types';
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   BarElement,
+//   Title,
+//   Tooltip as ChartTooltip,
+//   Legend,
+// } from 'chart.js';
+// import { Bar } from 'react-chartjs-2';
 
+// ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Legend);
 
+// interface LecturerDashboardProps {
+//   userId: string;
+// }
 
-import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+// const API_URL = 'http://localhost:8080';
+
+// const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
+//   // Fetch modules assigned to the lecturer
+//   const { data: modules, isLoading: modulesLoading } = useQuery<Module[]>({
+//     queryKey: ['modules', userId],
+//     queryFn: async () => {
+//       const response = await axios.get(`${API_URL}/api/module/lecturer/${userId}`);
+//       if (response.status !== 200) {
+//         throw new Error('Failed to fetch modules');
+//       }
+//       return response.data;
+//     },
+//   });
+
+//   // Fetch upcoming lectures for the lecturer
+//   const { data: lectures, isLoading: lecturesLoading } = useQuery<Lecture[]>({
+//     queryKey: ['lectures', userId],
+//     queryFn: async () => {
+//       const response = await axios.get(`${API_URL}/api/lecture`, {
+//         params: {
+//           filterModule: modules?.map((m: Module) => m.moduleId).join(','),
+//           sortBy: 'time',
+//           sortDir: 'asc',
+//         },
+//       });
+//       return response.data.data.filter(
+//         (lecture: Lecture) => new Date(lecture.time) >= new Date()
+//       );
+//     },
+//     enabled: !!modules,
+//   });
+
+//   // Fetch recent attendance records for the lecturer's lectures
+//   const { data: attendance, isLoading: attendanceLoading } = useQuery<Attendance[]>({
+//     queryKey: ['attendance', userId, modules],
+//     queryFn: async () => {
+//       if (!modules) return [];
+//       // Fetch lectures for all modules
+//       const lecturePromises = modules.map((module: Module) =>
+//         axios.get(`${API_URL}/api/lecture`, {
+//           params: { filterModule: module.moduleId },
+//         })
+//       );
+//       const lectureResponses = await Promise.all(lecturePromises);
+//       const lectureIds = lectureResponses
+//         .flatMap((res) => res.data.data)
+//         .map((lecture: Lecture) => lecture.lectureId);
+
+//       // Fetch attendance for these lectures
+//       const attendancePromises = lectureIds.map((lectureId: number) =>
+//         axios.get(`${API_URL}/api/attendance/lecture/${lectureId}/details`)
+//       );
+//       const attendanceResponses = await Promise.allSettled(attendancePromises);
+//       const attendanceRecords = attendanceResponses
+//         .filter((res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled')
+//         .flatMap((res) => res.value.data)
+//         .sort((a: Attendance, b: Attendance) =>
+//           new Date(b.markedAt).getTime() - new Date(a.markedAt).getTime()
+//         )
+//         .slice(0, 5); // Limit to 5 recent records
+
+//       return attendanceRecords;
+//     },
+//     enabled: !!modules,
+//   });
+
+//   // Fetch enrolled students across modules
+//   const { data: students, isLoading: studentsLoading } = useQuery<Student[]>({
+//     queryKey: ['students', modules],
+//     queryFn: async () => {
+//       if (!modules) return [];
+//       // Fetch lectures for all modules
+//       const lecturePromises = modules.map((module: Module) =>
+//         axios.get(`${API_URL}/api/lecture`, {
+//           params: { filterModule: module.moduleId },
+//         })
+//       );
+//       const lectureResponses = await Promise.all(lecturePromises);
+//       const lectureIds = lectureResponses
+//         .flatMap((res) => res.data.data)
+//         .map((lecture: Lecture) => lecture.lectureId);
+
+//       // Fetch enrolled students for these lectures
+//       const studentPromises = lectureIds.map((lectureId: number) =>
+//         axios.get(`${API_URL}/api/attendance/lecture/${lectureId}/students`)
+//       );
+//       const studentResponses = await Promise.allSettled(studentPromises);
+//       const uniqueStudents = Array.from(
+//         new Map(
+//           studentResponses
+//             .filter((res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled')
+//             .flatMap((res) => res.value.data)
+//             .map((student: Student) => [student.studentId, student])
+//         ).values()
+//       );
+//       return uniqueStudents;
+//     },
+//     enabled: !!modules,
+//   });
+
+//   // Chart data for attendance trends
+//   const attendanceChartData = {
+//     labels: modules?.map((m: Module) => m.name) || [],
+//     datasets: [
+//       {
+//         label: 'Attendance Rate (%)',
+//         data: modules?.map((m: Module) => {
+//           const moduleAttendance = attendance?.filter(
+//             (a: Attendance) => a.lecture.moduleId === m.moduleId
+//           );
+//           const attended = moduleAttendance?.filter((a: Attendance) => a.attended).length || 0;
+//           const total = moduleAttendance?.length || 1;
+//           return Math.round((attended / total) * 100);
+//         }) || [],
+//         backgroundColor: 'rgba(34, 197, 94, 0.5)',
+//         borderColor: 'rgba(34, 197, 94, 1)',
+//         borderWidth: 1,
+//       },
+//     ],
+//   };
+
+//   const isLoading =
+//     modulesLoading ||
+//     lecturesLoading ||
+//     attendanceLoading ||
+//     studentsLoading;
+
+//   return (
+//     <div className="p-6 max-w-7xl mx-auto space-y-6">
+//       <h1 className="text-2xl font-bold mb-4">Lecturer Dashboard</h1>
+
+//       {/* Metrics Widgets */}
+//       {isLoading ? (
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//           {[...Array(4)].map((_, i) => (
+//             <Skeleton key={i} className="h-32 w-full" />
+//           ))}
+//         </div>
+//       ) : (
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//           <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+//             <CardContent className="pt-6">
+//               <p className="text-sm">Total Modules</p>
+//               <h2 className="text-3xl font-bold">{modules?.length || 0}</h2>
+//               <p className="text-xs mt-2">
+//                 <i className="fas fa-arrow-up mr-1" /> {modules?.length || 0} assigned
+//               </p>
+//             </CardContent>
+//           </Card>
+//           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+//             <CardContent className="pt-6">
+//               <p className="text-sm">Upcoming Lectures</p>
+//               <h2 className="text-3xl font-bold">{lectures?.length || 0}</h2>
+//               <p className="text-xs mt-2">
+//                 <i className="fas fa-arrow-up mr-1" /> This month
+//               </p>
+//             </CardContent>
+//           </Card>
+//           <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+//             <CardContent className="pt-6">
+//               <p className="text-sm">Total Students</p>
+//               <h2 className="text-3xl font-bold">{students?.length || 0}</h2>
+//               <p className="text-xs mt-2">
+//                 <i className="fas fa-arrow-up mr-1" /> Across modules
+//               </p>
+//             </CardContent>
+//           </Card>
+//           <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+//             <CardContent className="pt-6">
+//               <p className="text-sm">Attendance Rate</p>
+//               <h2 className="text-3xl font-bold">
+//                 {attendance?.length
+//                   ? Math.round(
+//                       (attendance.filter((a: Attendance) => a.attended).length /
+//                         attendance.length) *
+//                         100
+//                     )
+//                   : 0}
+//                 %
+//               </h2>
+//               <p className="text-xs mt-2">
+//                 <i className="fas fa-arrow-down mr-1" /> Recent lectures
+//               </p>
+//             </CardContent>
+//           </Card>
+//         </div>
+//       )}
+
+//       {/* Chart and Recent Activity */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+//         <Card className="lg:col-span-2">
+//           <CardHeader>
+//             <CardTitle>Attendance Trends</CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             {isLoading ? (
+//               <Skeleton className="h-64 w-full" />
+//             ) : (
+//               <Bar
+//                 data={attendanceChartData}
+//                 options={{
+//                   responsive: true,
+//                   plugins: {
+//                     legend: { position: 'top' },
+//                     title: { display: true, text: 'Attendance by Module' },
+//                   },
+//                 }}
+//               />
+//             )}
+//           </CardContent>
+//         </Card>
+//         <Card>
+//           <CardHeader>
+//             <CardTitle>Recent Activity</CardTitle>
+//             <Button variant="outline" size="sm" asChild>
+//               <a href={`/lecturer/${userId}/attendance`}>View All</a>
+//             </Button>
+//           </CardHeader>
+//           <CardContent>
+//             {isLoading ? (
+//               <Skeleton className="h-32 w-full" />
+//             ) : attendance?.length > 0 ? (
+//               <ul className="space-y-4">
+//                 {attendance.map((att: Attendance) => (
+//                   <li key={att.attendanceId} className="flex items-start">
+//                     <Badge
+//                       variant={att.attended ? 'default' : 'destructive'}
+//                       className="mr-2 mt-1"
+//                     >
+//                       {att.attended ? 'P' : 'A'}
+//                     </Badge>
+//                     <div>
+//                       <p className="text-sm font-medium">
+//                         {att.student.firstName} {att.student.lastName}
+//                       </p>
+//                       <p className="text-xs text-muted-foreground">
+//                         {att.lecture.moduleId} -{' '}
+//                         {new Date(att.markedAt).toLocaleString()}
+//                       </p>
+//                     </div>
+//                   </li>
+//                 ))}
+//               </ul>
+//             ) : (
+//               <p className="text-sm text-muted-foreground">No recent activity.</p>
+//             )}
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       {/* Top Students */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+//         <Card className="lg:col-span-2">
+//           <CardHeader>
+//             <CardTitle>Top Students</CardTitle>
+//             <Button variant="outline" size="sm" asChild>
+//               <a href={`/lecturer/${userId}/students`}>View All</a>
+//             </Button>
+//           </CardHeader>
+//           <CardContent>
+//             {isLoading ? (
+//               <Skeleton className="h-32 w-full" />
+//             ) : students?.length > 0 ? (
+//               <Table>
+//                 <TableHeader>
+//                   <TableRow>
+//                     <TableHead>Student ID</TableHead>
+//                     <TableHead>Name</TableHead>
+//                     <TableHead>Module</TableHead>
+//                     <TableHead>Attendance</TableHead>
+//                   </TableRow>
+//                 </TableHeader>
+//                 <TableBody>
+//                   {students.slice(0, 5).map((student: Student) => {
+//                     const studentAttendance = attendance?.filter(
+//                       (att: Attendance) => att.student.studentId === student.studentId
+//                     );
+//                     const attendanceRate = studentAttendance?.length
+//                       ? Math.round(
+//                           (studentAttendance.filter((a: Attendance) => a.attended).length /
+//                             studentAttendance.length) *
+//                             100
+//                         )
+//                       : 0;
+//                     return (
+//                       <TableRow key={student.studentId}>
+//                         <TableCell>{student.studentId}</TableCell>
+//                         <TableCell>
+//                           {student.firstName} {student.lastName}
+//                         </TableCell>
+//                         <TableCell>
+//                           {modules
+//                             .find((m: Module) =>
+//                               studentAttendance?.some(
+//                                 (a: Attendance) => a.lecture.moduleId === m.moduleId
+//                               )
+//                             )?.name || 'N/A'}
+//                         </TableCell>
+//                         <TableCell>
+//                           <Badge variant={attendanceRate > 80 ? 'default' : 'destructive'}>
+//                             {attendanceRate}%
+//                           </Badge>
+//                         </TableCell>
+//                       </TableRow>
+//                     );
+//                   })}
+//                 </TableBody>
+//               </Table>
+//             ) : (
+//               <p className="text-sm text-muted-foreground">No students enrolled.</p>
+//             )}
+//           </CardContent>
+//         </Card>
+//         <Card>
+//           <CardHeader>
+//             <CardTitle>Upcoming Assignments</CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             <p className="text-sm text-muted-foreground">No upcoming assignments.</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       {/* Recent Attendance Records */}
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>Recent Attendance Records</CardTitle>
+//           <Button variant="outline" size="sm" asChild>
+//             <a href={`/lecturer/${userId}/attendance`}>Manage Attendance</a>
+//           </Button>
+//         </CardHeader>
+//         <CardContent>
+//           {isLoading ? (
+//             <Skeleton className="h-64 w-full" />
+//           ) : attendance?.length > 0 ? (
+//             <Table>
+//               <TableHeader>
+//                 <TableRow>
+//                   <TableHead>Student</TableHead>
+//                   <TableHead>Module</TableHead>
+//                   <TableHead>Lecture Time</TableHead>
+//                   <TableHead>Status</TableHead>
+//                   <TableHead>Marked At</TableHead>
+//                 </TableRow>
+//               </TableHeader>
+//               <TableBody>
+//                 {attendance.map((att: Attendance) => (
+//                   <TableRow key={att.attendanceId}>
+//                     <TableCell>
+//                       {att.student.firstName} {att.student.lastName}
+//                     </TableCell>
+//                     <TableCell>{att.lecture.moduleId}</TableCell>
+//                     <TableCell>{new Date(att.lecture.time).toLocaleString()}</TableCell>
+//                     <TableCell>
+//                       <Badge variant={att.attended ? 'default' : 'destructive'}>
+//                         {att.attended ? 'Present' : 'Absent'}
+//                       </Badge>
+//                     </TableCell>
+//                     <TableCell>{new Date(att.markedAt).toLocaleString()}</TableCell>
+//                   </TableRow>
+//                 ))}
+//               </TableBody>
+//             </Table>
+//           ) : (
+//             <p className="text-sm text-muted-foreground">No attendance records.</p>
+//           )}
+//         </CardContent>
+//       </Card>
+//     </div>
+//   );
+// };
+
+// export default LecturerDashboard;
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -17,38 +422,47 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Module, Lecture, Attendance, Student } from '../types';
+} from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import {
+  BarElement,
+  CategoryScale,
   Chart as ChartJS,
+  Tooltip as ChartTooltip,
+  Legend,
+  LinearScale,
+  Title,
+} from "chart.js";
+import * as React from "react";
+import { Bar } from "react-chartjs-2";
+import { Attendance, Lecture, Module, Student } from "../types";
+
+ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   Title,
-  Tooltip as ChartTooltip,
-  Legend,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Legend);
+  ChartTooltip,
+  Legend
+);
 
 interface LecturerDashboardProps {
   userId: string;
 }
 
-const API_URL = 'http://localhost:8080';
+const API_URL = "http://localhost:8080";
 
 const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
   // Fetch modules assigned to the lecturer
   const { data: modules, isLoading: modulesLoading } = useQuery<Module[]>({
-    queryKey: ['modules', userId],
+    queryKey: ["modules", userId],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/api/module/lecturer/${userId}`);
+      const response = await axios.get(
+        `${API_URL}/api/module/lecturer/${userId}`
+      );
       if (response.status !== 200) {
-        throw new Error('Failed to fetch modules');
+        throw new Error("Failed to fetch modules");
       }
       return response.data;
     },
@@ -56,13 +470,13 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
 
   // Fetch upcoming lectures for the lecturer
   const { data: lectures, isLoading: lecturesLoading } = useQuery<Lecture[]>({
-    queryKey: ['lectures', userId],
+    queryKey: ["lectures", userId],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/api/lecture`, {
         params: {
-          filterModule: modules?.map((m: Module) => m.moduleId).join(','),
-          sortBy: 'time',
-          sortDir: 'asc',
+          filterModule: modules?.map((m: Module) => m.moduleId).join(","),
+          sortBy: "time",
+          sortDir: "asc",
         },
       });
       return response.data.data.filter(
@@ -73,8 +487,10 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
   });
 
   // Fetch recent attendance records for the lecturer's lectures
-  const { data: attendance, isLoading: attendanceLoading } = useQuery<Attendance[]>({
-    queryKey: ['attendance', userId, modules],
+  const { data: attendance, isLoading: attendanceLoading } = useQuery<
+    Attendance[]
+  >({
+    queryKey: ["attendance", userId, modules],
     queryFn: async () => {
       if (!modules) return [];
       // Fetch lectures for all modules
@@ -94,10 +510,14 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
       );
       const attendanceResponses = await Promise.allSettled(attendancePromises);
       const attendanceRecords = attendanceResponses
-        .filter((res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled')
+        .filter(
+          (res): res is PromiseFulfilledResult<any> =>
+            res.status === "fulfilled"
+        )
         .flatMap((res) => res.value.data)
-        .sort((a: Attendance, b: Attendance) =>
-          new Date(b.markedAt).getTime() - new Date(a.markedAt).getTime()
+        .sort(
+          (a: Attendance, b: Attendance) =>
+            new Date(b.markedAt).getTime() - new Date(a.markedAt).getTime()
         )
         .slice(0, 5); // Limit to 5 recent records
 
@@ -108,7 +528,7 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
 
   // Fetch enrolled students across modules
   const { data: students, isLoading: studentsLoading } = useQuery<Student[]>({
-    queryKey: ['students', modules],
+    queryKey: ["students", modules],
     queryFn: async () => {
       if (!modules) return [];
       // Fetch lectures for all modules
@@ -130,7 +550,10 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
       const uniqueStudents = Array.from(
         new Map(
           studentResponses
-            .filter((res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled')
+            .filter(
+              (res): res is PromiseFulfilledResult<any> =>
+                res.status === "fulfilled"
+            )
             .flatMap((res) => res.value.data)
             .map((student: Student) => [student.studentId, student])
         ).values()
@@ -145,31 +568,33 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
     labels: modules?.map((m: Module) => m.name) || [],
     datasets: [
       {
-        label: 'Attendance Rate (%)',
-        data: modules?.map((m: Module) => {
-          const moduleAttendance = attendance?.filter(
-            (a: Attendance) => a.lecture.moduleId === m.moduleId
-          );
-          const attended = moduleAttendance?.filter((a: Attendance) => a.attended).length || 0;
-          const total = moduleAttendance?.length || 1;
-          return Math.round((attended / total) * 100);
-        }) || [],
-        backgroundColor: 'rgba(34, 197, 94, 0.5)',
-        borderColor: 'rgba(34, 197, 94, 1)',
+        label: "Attendance Rate (%)",
+        data:
+          modules?.map((m: Module) => {
+            const moduleAttendance = attendance?.filter(
+              (a: Attendance) => a.lecture.moduleId === m.moduleId
+            );
+            const attended =
+              moduleAttendance?.filter((a: Attendance) => a.attended).length ||
+              0;
+            const total = moduleAttendance?.length || 1;
+            return Math.round((attended / total) * 100);
+          }) || [],
+        backgroundColor: "rgba(30, 58, 138, 0.5)", // Matches #1E3A8A with opacity
+        borderColor: "#1E3A8A", // Matches #1E3A8A
         borderWidth: 1,
       },
     ],
   };
 
   const isLoading =
-    modulesLoading ||
-    lecturesLoading ||
-    attendanceLoading ||
-    studentsLoading;
+    modulesLoading || lecturesLoading || attendanceLoading || studentsLoading;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold mb-4">Lecturer Dashboard</h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-6 bg-[#F3F4F6] text-[#111827]">
+      <h1 className="text-2xl font-bold mb-4 text-[#1E3A8A]">
+        Lecturer Dashboard
+      </h1>
 
       {/* Metrics Widgets */}
       {isLoading ? (
@@ -180,37 +605,44 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+          <Card className="bg-gradient-to-r from-blue-50 to-white text-[#111827] shadow-md">
             <CardContent className="pt-6">
-              <p className="text-sm">Total Modules</p>
-              <h2 className="text-3xl font-bold">{modules?.length || 0}</h2>
-              <p className="text-xs mt-2">
-                <i className="fas fa-arrow-up mr-1" /> {modules?.length || 0} assigned
+              <p className="text-sm text-[#374151]">Total Modules</p>
+              <h2 className="text-3xl font-bold text-[#1E3A8A]">
+                {modules?.length || 0}
+              </h2>
+              <p className="text-xs mt-2 text-[#374151]">
+                <i className="fas fa-arrow-up mr-1" /> {modules?.length || 0}{" "}
+                assigned
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <Card className="bg-gradient-to-r from-blue-50 to-white text-[#111827] shadow-md">
             <CardContent className="pt-6">
-              <p className="text-sm">Upcoming Lectures</p>
-              <h2 className="text-3xl font-bold">{lectures?.length || 0}</h2>
-              <p className="text-xs mt-2">
+              <p className="text-sm text-[#374151]">Upcoming Lectures</p>
+              <h2 className="text-3xl font-bold text-[#1E3A8A]">
+                {lectures?.length || 0}
+              </h2>
+              <p className="text-xs mt-2 text-[#374151]">
                 <i className="fas fa-arrow-up mr-1" /> This month
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+          <Card className="bg-gradient-to-r from-blue-50 to-white text-[#111827] shadow-md">
             <CardContent className="pt-6">
-              <p className="text-sm">Total Students</p>
-              <h2 className="text-3xl font-bold">{students?.length || 0}</h2>
-              <p className="text-xs mt-2">
+              <p className="text-sm text-[#374151]">Total Students</p>
+              <h2 className="text-3xl font-bold text-[#1E3A8A]">
+                {students?.length || 0}
+              </h2>
+              <p className="text-xs mt-2 text-[#374151]">
                 <i className="fas fa-arrow-up mr-1" /> Across modules
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+          <Card className="bg-gradient-to-r from-blue-50 to-white text-[#111827] shadow-md">
             <CardContent className="pt-6">
-              <p className="text-sm">Attendance Rate</p>
-              <h2 className="text-3xl font-bold">
+              <p className="text-sm text-[#374151]">Attendance Rate</p>
+              <h2 className="text-3xl font-bold text-[#1E3A8A]">
                 {attendance?.length
                   ? Math.round(
                       (attendance.filter((a: Attendance) => a.attended).length /
@@ -220,7 +652,7 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
                   : 0}
                 %
               </h2>
-              <p className="text-xs mt-2">
+              <p className="text-xs mt-2 text-[#374151]">
                 <i className="fas fa-arrow-down mr-1" /> Recent lectures
               </p>
             </CardContent>
@@ -230,9 +662,9 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
 
       {/* Chart and Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-[#F9FAFB] shadow-md">
           <CardHeader>
-            <CardTitle>Attendance Trends</CardTitle>
+            <CardTitle className="text-[#1E3A8A]">Attendance Trends</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -243,18 +675,37 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
                 options={{
                   responsive: true,
                   plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: 'Attendance by Module' },
+                    legend: { position: "top" },
+                    title: {
+                      display: true,
+                      text: "Attendance by Module",
+                      color: "#1E3A8A",
+                    },
+                  },
+                  scales: {
+                    y: {
+                      ticks: { color: "#374151" },
+                      grid: { color: "#E5E7EB" },
+                    },
+                    x: {
+                      ticks: { color: "#374151" },
+                      grid: { color: "#E5E7EB" },
+                    },
                   },
                 }}
               />
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#F9FAFB] shadow-md">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <Button variant="outline" size="sm" asChild>
+            <CardTitle className="text-[#1E3A8A]">Recent Activity</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition"
+            >
               <a href={`/lecturer/${userId}/attendance`}>View All</a>
             </Button>
           </CardHeader>
@@ -266,17 +717,17 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
                 {attendance.map((att: Attendance) => (
                   <li key={att.attendanceId} className="flex items-start">
                     <Badge
-                      variant={att.attended ? 'default' : 'destructive'}
+                      variant={att.attended ? "default" : "destructive"}
                       className="mr-2 mt-1"
                     >
-                      {att.attended ? 'P' : 'A'}
+                      {att.attended ? "P" : "A"}
                     </Badge>
                     <div>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium text-[#374151]">
                         {att.student.firstName} {att.student.lastName}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {att.lecture.moduleId} -{' '}
+                      <p className="text-xs text-[#374151]">
+                        {att.lecture.moduleId} -{" "}
                         {new Date(att.markedAt).toLocaleString()}
                       </p>
                     </div>
@@ -284,7 +735,7 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No recent activity.</p>
+              <p className="text-sm text-[#374151]">No recent activity.</p>
             )}
           </CardContent>
         </Card>
@@ -292,10 +743,15 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
 
       {/* Top Students */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-[#F9FAFB] shadow-md">
           <CardHeader>
-            <CardTitle>Top Students</CardTitle>
-            <Button variant="outline" size="sm" asChild>
+            <CardTitle className="text-[#1E3A8A]">Top Students</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition"
+            >
               <a href={`/lecturer/${userId}/students`}>View All</a>
             </Button>
           </CardHeader>
@@ -306,40 +762,49 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Module</TableHead>
-                    <TableHead>Attendance</TableHead>
+                    <TableHead className="text-[#1E3A8A]">Student ID</TableHead>
+                    <TableHead className="text-[#1E3A8A]">Name</TableHead>
+                    <TableHead className="text-[#1E3A8A]">Module</TableHead>
+                    <TableHead className="text-[#1E3A8A]">Attendance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {students.slice(0, 5).map((student: Student) => {
                     const studentAttendance = attendance?.filter(
-                      (att: Attendance) => att.student.studentId === student.studentId
+                      (att: Attendance) =>
+                        att.student.studentId === student.studentId
                     );
                     const attendanceRate = studentAttendance?.length
                       ? Math.round(
-                          (studentAttendance.filter((a: Attendance) => a.attended).length /
+                          (studentAttendance.filter(
+                            (a: Attendance) => a.attended
+                          ).length /
                             studentAttendance.length) *
                             100
                         )
                       : 0;
                     return (
                       <TableRow key={student.studentId}>
-                        <TableCell>{student.studentId}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-[#374151]">
+                          {student.studentId}
+                        </TableCell>
+                        <TableCell className="text-[#374151]">
                           {student.firstName} {student.lastName}
                         </TableCell>
-                        <TableCell>
-                          {modules
-                            .find((m: Module) =>
-                              studentAttendance?.some(
-                                (a: Attendance) => a.lecture.moduleId === m.moduleId
-                              )
-                            )?.name || 'N/A'}
+                        <TableCell className="text-[#374151]">
+                          {modules.find((m: Module) =>
+                            studentAttendance?.some(
+                              (a: Attendance) =>
+                                a.lecture.moduleId === m.moduleId
+                            )
+                          )?.name || "N/A"}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={attendanceRate > 80 ? 'default' : 'destructive'}>
+                          <Badge
+                            variant={
+                              attendanceRate > 80 ? "default" : "destructive"
+                            }
+                          >
                             {attendanceRate}%
                           </Badge>
                         </TableCell>
@@ -349,25 +814,34 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-sm text-muted-foreground">No students enrolled.</p>
+              <p className="text-sm text-[#374151]">No students enrolled.</p>
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#F9FAFB] shadow-md">
           <CardHeader>
-            <CardTitle>Upcoming Assignments</CardTitle>
+            <CardTitle className="text-[#1E3A8A]">
+              Upcoming Assignments
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">No upcoming assignments.</p>
+            <p className="text-sm text-[#374151]">No upcoming assignments.</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Attendance Records */}
-      <Card>
+      <Card className="bg-[#F9FAFB] shadow-md">
         <CardHeader>
-          <CardTitle>Recent Attendance Records</CardTitle>
-          <Button variant="outline" size="sm" asChild>
+          <CardTitle className="text-[#1E3A8A]">
+            Recent Attendance Records
+          </CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition"
+          >
             <a href={`/lecturer/${userId}/attendance`}>Manage Attendance</a>
           </Button>
         </CardHeader>
@@ -378,33 +852,39 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ userId }) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Module</TableHead>
-                  <TableHead>Lecture Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Marked At</TableHead>
+                  <TableHead className="text-[#1E3A8A]">Student</TableHead>
+                  <TableHead className="text-[#1E3A8A]">Module</TableHead>
+                  <TableHead className="text-[#1E3A8A]">Lecture Time</TableHead>
+                  <TableHead className="text-[#1E3A8A]">Status</TableHead>
+                  <TableHead className="text-[#1E3A8A]">Marked At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {attendance.map((att: Attendance) => (
                   <TableRow key={att.attendanceId}>
-                    <TableCell>
+                    <TableCell className="text-[#374151]">
                       {att.student.firstName} {att.student.lastName}
                     </TableCell>
-                    <TableCell>{att.lecture.moduleId}</TableCell>
-                    <TableCell>{new Date(att.lecture.time).toLocaleString()}</TableCell>
+                    <TableCell className="text-[#374151]">
+                      {att.lecture.moduleId}
+                    </TableCell>
+                    <TableCell className="text-[#374151]">
+                      {new Date(att.lecture.time).toLocaleString()}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant={att.attended ? 'default' : 'destructive'}>
-                        {att.attended ? 'Present' : 'Absent'}
+                      <Badge variant={att.attended ? "default" : "destructive"}>
+                        {att.attended ? "Present" : "Absent"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(att.markedAt).toLocaleString()}</TableCell>
+                    <TableCell className="text-[#374151]">
+                      {new Date(att.markedAt).toLocaleString()}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-sm text-muted-foreground">No attendance records.</p>
+            <p className="text-sm text-[#374151]">No attendance records.</p>
           )}
         </CardContent>
       </Card>

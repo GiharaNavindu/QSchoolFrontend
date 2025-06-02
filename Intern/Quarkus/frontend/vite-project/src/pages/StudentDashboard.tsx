@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "chart.js";
 import * as React from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 import toast from "react-hot-toast";
 import { Course, Enrolls } from "../types";
 
@@ -34,7 +34,7 @@ interface StudentDashboardProps {
 const API_URL = "http://localhost:8080";
 
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
-  const effectiveUserId = userId || "STU001";
+  const effectiveUserId = userId || "S001";
 
   // Log userId for debugging
   React.useEffect(() => {
@@ -174,7 +174,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
         borderWidth: 1,
       },
     ],
- 
   };
 
   console.log("Enrollment chart data:", enrollmentChartData);
@@ -217,7 +216,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
-      
 
       {studentLoading ||
       enrollmentsLoading ||
@@ -310,33 +308,32 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ userId }) => {
 
           {/* Course Enrollment Distribution */}
           {/* Course Enrollment Distribution (Pie Chart) */}
-<Card>
-  <CardHeader>
-    <CardTitle>Course Credit Distribution (Pie Chart)</CardTitle>
-  </CardHeader>
-  <CardContent>
-    {enrollments?.length > 0 ? (
-      <Pie
-        data={enrollmentChartData}
-        options={{
-          plugins: {
-            title: {
-              display: true,
-              text: "Credits by Course (Pie View)",
-            },
-            legend: {
-              position: "right",
-            },
-          },
-        }}
-        height={200}
-      />
-    ) : (
-      <p>No enrollment data available for chart.</p>
-    )}
-  </CardContent>
-</Card>
-
+          <Card>
+            <CardHeader>
+              <CardTitle>Course Credit Distribution (Pie Chart)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {enrollments?.length > 0 ? (
+                <Pie
+                  data={enrollmentChartData}
+                  options={{
+                    plugins: {
+                      title: {
+                        display: true,
+                        text: "Credits by Course (Pie View)",
+                      },
+                      legend: {
+                        position: "right",
+                      },
+                    },
+                  }}
+                  height={200}
+                />
+              ) : (
+                <p>No enrollment data available for chart.</p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Academic Progress */}
           <Card>
